@@ -1,3 +1,25 @@
+#  Copyright 2021, Dylan Roger
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+#  documentation files (the "Software"), to deal in the Software without restriction, including without
+#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+#  BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+#  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+#  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+#  documentation files (the "Software"), to deal in the Software without restriction, including without
+#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+#
 import unittest
 
 from markdown_spring_shell_documentation.parser import Parser
@@ -11,15 +33,7 @@ class ParserTestCase(unittest.TestCase):
     def test_complete(self):
         """
         TODO constants with the same name but different value
-        TODO ShellComponent et SshShellComponent
         TODO unknown constant : if not in the constants, return the constant name
-        Parameter
-        * pas de shell option string
-        * default value
-        * shell option mais pas de value
-        * une seule value ex: ["--value"]
-        * pluieurs values ex: ["-v", "--value"]
-        * constante dans un autre fichier
         """
         Verifier(self) \
             .withClass(Class("System Command")  # No group
@@ -28,8 +42,19 @@ class ParserTestCase(unittest.TestCase):
                        .withMethod(Method("no-key", "No key in ShellMethod"))
                        .withMethod(Method("no-description", ""))) \
             .withClass(Class("System Commands commands")  # Shell commands group
-                       .withMethod(Method("key", "List system environment."))) \
+                       .withMethod(Method("no-shell-option", "description")
+                                   .withParameter(Parameter(["--value"], "", "", True)))
+                       .withMethod(Method("default-value", "description")
+                                   .withParameter(Parameter(["--value"], "", "abc", False)))
+                       .withMethod(Method("only-one-value", "description")
+                                   .withParameter(Parameter(["-v"], "", "abc", False)))
+                       .withMethod(Method("multiple-values", "description")
+                                   .withParameter(Parameter(["-v", "--value"], "", "abc", False)))
+                       .withMethod(Method("system-env", "")
+                                   .withParameter(Parameter(["--value"], "system-env", "", True)))) \
             .withClass(Class("System Commands group")  # Shell component group
+                       .withMethod(Method("system-env", "List system environment."))) \
+            .withClass(Class("System Commands group")  # Ssh Shell component group
                        .withMethod(Method("system-env", "List system environment."))) \
             .verify(Parser("files/complete").parse())
 

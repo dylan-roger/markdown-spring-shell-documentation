@@ -1,3 +1,25 @@
+#  Copyright 2021, Dylan Roger
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+#  documentation files (the "Software"), to deal in the Software without restriction, including without
+#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+#  BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+#  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+#  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+#  documentation files (the "Software"), to deal in the Software without restriction, including without
+#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+#
 import os
 import re
 
@@ -19,14 +41,14 @@ def camel_to_kebab(name):
     return re.sub('([a-z0-9])([A-Z])', r'\1-\2', name).lower()
 
 
-def trim_slashes(string):
+def trim_quotes(string):
     return string.strip("\"")
 
 
 def resolve_constant(variable, constants):
     # TODO manage the case where multiple constants have the same name : use the package to differentiate them
     if isinstance(variable, javalang.tree.Literal):
-        return trim_slashes(variable.value)
+        return trim_quotes(variable.value)
     elif isinstance(variable, javalang.tree.MemberReference):
         # TODO if not in the constants, return the constant name
         return constants[variable.member]
@@ -45,7 +67,7 @@ class ParameterDetails:
         if shell_option_annotation is not None:
             for element in shell_option_annotation.element:
                 if element.name == "value":
-                    self.value = [trim_slashes(v.value) for v in element.value.values]
+                    self.value = [trim_quotes(v.value) for v in element.value.values]
                 elif element.name == "help":
                     self.help = element.value
                 elif element.name == "defaultValue":
@@ -122,7 +144,7 @@ class Parser:
         for field in clazz.fields:
             if field.type.name in self.supported_constants:
                 name = field.declarators[0].name
-                value = trim_slashes(field.declarators[0].initializer.value)
+                value = trim_quotes(field.declarators[0].initializer.value)
                 constants[name] = value
 
     @staticmethod
@@ -141,8 +163,9 @@ class Parser:
         classes = []
         # Keep the constants found to replace them with their actual value
         constants = {}
+        # TODO manage files and directories instead of only directories
         # TODO list recursively
-        for file in os.listdir(self.path):
+        for file in os.listdir(self.path.strip()):
             if not file.endswith(".java"):
                 continue
             with open(os.path.join(self.path, file)) as f:

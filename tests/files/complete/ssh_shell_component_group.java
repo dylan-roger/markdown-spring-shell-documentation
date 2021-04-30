@@ -1,6 +1,6 @@
 package something;
 
-@ShellComponent(group = GROUP)
+@SshShellComponent(group = GROUP)
 public class SystemCommand {
 
     private static final String COMMAND_SYSTEM_ENV = "system-env";
