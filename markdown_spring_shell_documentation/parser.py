@@ -20,17 +20,16 @@
 #  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 #
 #
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-#  documentation files (the "Software"), to deal in the Software without restriction, including without
-#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-#
 import os
 import re
 
 import javalang
+
+SSH_SHELL_COMPONENT = "SshShellComponent"
+SHELL_COMPONENT = "ShellComponent"
+SHELL_COMMAND_GROUP = "ShellCommandGroup"
+SHELL_METHOD = "ShellMethod"
+SHELL_OPTION = "ShellOption"
 
 
 def find_annotation(node, annotation_names):
@@ -57,8 +56,10 @@ def resolve_constant(variable, constants):
     if isinstance(variable, javalang.tree.Literal):
         return trim_quotes(variable.value)
     elif isinstance(variable, javalang.tree.MemberReference):
-        # TODO if not in the constants, return the constant name
-        return constants[variable.member]
+        if variable.member in constants:
+            return constants[variable.member]
+        else:
+            return variable.member
     else:
         return variable
 
@@ -70,7 +71,7 @@ class ParameterDetails:
     required = False
 
     def __init__(self, parameter, shell_option_annotation):
-        # Parse the annotation first
+        # Parse the ShellOption first
         if shell_option_annotation is not None:
             for element in shell_option_annotation.element:
                 if element.name == "value":
@@ -118,7 +119,7 @@ class MethodDetails:
         # Find the parameters
         for parameter in method.parameters:
             if len(parameter.annotations) != 0:
-                shell_option_annotation = find_annotation(parameter, "ShellOption")
+                shell_option_annotation = find_annotation(parameter, SHELL_OPTION)
                 self.parameters.append(ParameterDetails(parameter, shell_option_annotation))
             else:
                 self.parameters.append(ParameterDetails(parameter, None))
@@ -142,54 +143,57 @@ class ClassDetails:
 
 
 class Parser:
-    supported_constants = ["String", "int", "float", "long", "boolean"]
+    supported_constants_type = ["String"]
 
     def __init__(self, path):
-        self.path = path
+        self.path = path.strip()
 
     def __add_constants(self, constants, clazz):
         for field in clazz.fields:
-            if field.type.name in self.supported_constants:
+            if field.type.name in self.supported_constants_type:
                 name = field.declarators[0].name
                 value = trim_quotes(field.declarators[0].initializer.value)
                 constants[name] = value
 
     @staticmethod
     def __find_group_name(clazz):
-        shell_annotation = find_annotation(clazz, ["SshShellComponent", "ShellComponent"])
+        shell_annotation = find_annotation(clazz, [SSH_SHELL_COMPONENT, SHELL_COMPONENT])
         if shell_annotation.element is not None:
             for element in shell_annotation.element:
                 if element.name == "group":
                     return element.value
-        command_group_annotation = find_annotation(clazz, "ShellCommandGroup")
+        command_group_annotation = find_annotation(clazz, SHELL_COMMAND_GROUP)
         if command_group_annotation is not None:
             return command_group_annotation.element
         return re.sub("([a-z])([A-Z])", r"\g<1> \g<2>", clazz.name)
 
+    def __internal_parse(self, file_path, classes, constants):
+        with open(file_path) as f:
+            tree = javalang.parse.parse("".join(f.readlines()))
+            for _, clazz in tree.filter(javalang.tree.ClassDeclaration):
+                self.__add_constants(constants, clazz)
+                if find_annotation(clazz, [SSH_SHELL_COMPONENT, SHELL_COMPONENT]) is not None:
+                    group_name = self.__find_group_name(clazz)
+                    # Find the shell methods in this component
+                    methods = []
+                    for method in clazz.methods:
+                        shell_method_annotation = find_annotation(method, SHELL_METHOD)
+                        if shell_method_annotation is not None:
+                            methods.append(MethodDetails(method, shell_method_annotation))
+                    if len(methods) != 0:
+                        classes.append(ClassDetails(group_name, methods))
+
     def parse(self):
         classes = []
-        # Keep the constants found to replace them with their actual value
+        # Keep the constants found during the parsing to replace them with their actual value at the end
         constants = {}
-        # TODO manage files and directories instead of only directories
-        # TODO list recursively
-        for file in os.listdir(self.path.strip()):
-            if not file.endswith(".java"):
-                continue
-            with open(os.path.join(self.path, file)) as f:
-                tree = javalang.parse.parse("".join(f.readlines()))
-                for _, clazz in tree.filter(javalang.tree.ClassDeclaration):
-                    self.__add_constants(constants, clazz)
-                    if find_annotation(clazz, ["SshShellComponent", "ShellComponent"]) is not None:
-                        group_name = self.__find_group_name(clazz)
-                        # Find the shell methods in this component
-                        methods = []
-                        for method in clazz.methods:
-                            shell_method_annotation = find_annotation(method, "ShellMethod")
-                            if shell_method_annotation is not None:
-                                methods.append(MethodDetails(method, shell_method_annotation))
-                        if len(methods) != 0:
-                            classes.append(ClassDetails(group_name, methods))
-
+        if os.path.isfile(self.path) and self.path.endswith(".java"):
+            self.__internal_parse(self.path, classes, constants)
+        else:
+            for file in os.listdir(self.path):
+                if not file.endswith(".java"):
+                    continue
+                self.__internal_parse(os.path.join(self.path, file), classes, constants)
         for clazz in classes:
             clazz.resolve_constants(constants)
         return classes

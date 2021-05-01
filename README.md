@@ -1,7 +1,17 @@
 # markdown-spring-shell-documentation
 A markdown extension that creates a documentation from Java classes using Spring Shell or [ssh-shell-spring-boot](https://github.com/fonimus/ssh-shell-spring-boot).
 
+A [demo](https://dylan-roger.github.io/markdown-spring-shell-documentation/) using the _mkdocs-material_ theme is available, 
+and you can also see a sample configuration [here](https://github.com/dylan-roger/markdown-spring-shell-documentation/tree/main/tests/sample_site).
+
 ## Installation
+
+````
+# release
+pip install git+https://github.com/dylan-roger/markdown-ssh-shell-documentation.git@<tag>
+# master
+pip install git+https://github.com/dylan-roger/markdown-ssh-shell-documentation.git
+````
 
 ## Usage
 
@@ -18,13 +28,14 @@ markdown_extensions:
 
 ### Markdown syntax
 
-To include content generated from your ShellComponents, you can add the following line in your Markdown files :
-
-[//]: # (TODO specify it is only the directory)
+To include the documentation generated from your ShellComponents, you can add the following line in your Markdown files :
 
 ````
-(!./path/to/the/directory1, ./path/to/the/directory2, ./path/to/the/directory3!)
+(!./path/to/the/directory1/, ./path/to/the/directory2/file.java, ./path/to/the/directory3/!)
 ````
+
+* Multiple paths can be provided, they must be separated by a comma ``,``
+* A path can be a directory or a file
 
 ## Examples
 
@@ -104,4 +115,4 @@ Command to add a user.
     }  
     ````
 
-* Cannot resolve constants from outside the working directory (ie: the directory passed in ``(!here!)``). In such cases, the constant is returned
+* Cannot resolve constants from outside the working directory (ie: the directory passed in ``(!here!)``). In such cases, the constant name is returned

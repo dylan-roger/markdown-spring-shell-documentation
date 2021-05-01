@@ -20,13 +20,6 @@
 #  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 #
 #
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-#  documentation files (the "Software"), to deal in the Software without restriction, including without
-#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-#
 import os
 import re
 import traceback
@@ -115,7 +108,6 @@ class ShellPreprocessor(Preprocessor):
                         lines_to_add.append(self.__table_row("Name", "Required", "Default Value", "Description"))
                         lines_to_add.append(self.__table_row("---", ":---:", ":---:", "---"))
                         for parameter in sorted(method.parameters, key=lambda x: not x.required):
-                            # TODO make row prettier
                             lines_to_add.append(self.__table_row(
                                 self.__list_to_string(parameter.value),
                                 str(parameter.required).lower(),
