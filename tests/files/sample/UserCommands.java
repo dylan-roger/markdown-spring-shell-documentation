@@ -4,7 +4,7 @@ package something;
 @ShellCommandGroup("User commands")
 public class UserCommands {
 
-    @ShellMethod(value = "Creates a user and prints its API key.")
+    @ShellMethod(value = "Create a user and returns its API key.")
     public Object createUser(
         @ShellOption(value = {"-n", "--name"}, help = "The name of the user to add.") String name,
         @ShellOption(value = {"-d", "--duration"}, help = "The number of days before the API key expires.", defaultValue = "365") int duration) {

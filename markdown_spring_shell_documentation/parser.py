@@ -20,6 +20,13 @@
 #  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 #
 #
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+#  documentation files (the "Software"), to deal in the Software without restriction, including without
+#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+#
 import os
 import re
 
@@ -180,7 +187,9 @@ class Parser:
                             shell_method_annotation = find_annotation(method, "ShellMethod")
                             if shell_method_annotation is not None:
                                 methods.append(MethodDetails(method, shell_method_annotation))
-                        classes.append(ClassDetails(group_name, methods))
+                        if len(methods) != 0:
+                            classes.append(ClassDetails(group_name, methods))
+
         for clazz in classes:
             clazz.resolve_constants(constants)
         return classes

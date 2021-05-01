@@ -23,7 +23,7 @@ To include content generated from your ShellComponents, you can add the followin
 [//]: # (TODO specify it is only the directory)
 
 ````
-(!./path/to/the/directory!)
+(!./path/to/the/directory1, ./path/to/the/directory2, ./path/to/the/directory3!)
 ````
 
 ## Examples
@@ -49,7 +49,7 @@ you can include this in your documentation by using the specific include syntax:
 
 (!./path/to/the/directory!)
 
-...the rest of my documentation...
+...the rest of the documentation...
 ````
 
 and this will output something like this :
@@ -63,11 +63,12 @@ and this will output something like this :
 
 Command to add a user.
 
-| Name   | Required | Default value | Description
-|--------|:--------:|:-------------:|---------
-| --name | false    | John Doe      | The name of the user.
+| Name       | Required | Default value | Description
+|------------|:--------:|:-------------:|---------
+| -a, --age  | true     |               | The age of the user. Must be a positive integer
+| --name     | false    | John Doe      | The name of the user.
 
-...the rest of my documentation... 
+...the rest of the documentation... 
 ````
 
 and is rendered in HTML like in the next part :
@@ -80,15 +81,16 @@ and is rendered in HTML like in the next part :
 
 Command to add a user.
 
-| Name   | Required | Default value | Description
-|--------|:--------:|:-------------:|---------
-| --name | false    | John Doe      | The name of the user. 
+| Name       | Required | Default value | Description
+|------------|:--------:|:-------------:|---------
+| -a, --age  | true     |               | The age of the user. Must be a positive integer
+| --name     | false    | John Doe      | The name of the user. 
 
-...the rest of my documentation...
+...the rest of the documentation...
 
 ## Limitations
 
-* Can only be used to parse Java code
+* Can only be used to parse Java code. If you want to parse Kotlin code, you can still reference the ``kapt`` output directory
 
 * Cannot resolve constants with operations 
 
@@ -102,4 +104,4 @@ Command to add a user.
     }  
     ````
 
-* Cannot resolve constants from outside the working directory (ie: the directory passed in ``(!here!)``)
+* Cannot resolve constants from outside the working directory (ie: the directory passed in ``(!here!)``). In such cases, the constant is returned

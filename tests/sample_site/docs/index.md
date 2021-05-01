@@ -1,3 +1,3 @@
 # Commands guide
 
-(!./sample!)
+(!./sample, ./complete!)
