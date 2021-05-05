@@ -1,0 +1,6 @@
+site_name: Markdown Spring Shell documentation sample
+theme:
+  name: material
+markdown_extensions:
+  - markdown_spring_shell_documentation.extension:
+      base_path: '../files/'
