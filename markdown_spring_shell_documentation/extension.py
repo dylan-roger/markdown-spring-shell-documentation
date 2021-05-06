@@ -13,13 +13,6 @@
 #  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 #  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-#  documentation files (the "Software"), to deal in the Software without restriction, including without
-#  limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-#  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-#
 import os
 import re
 import traceback
@@ -41,7 +34,8 @@ class MarkdownShell(Extension):
             configs = {}
         self.config = {
             'base_path': ['.', 'Default location from which to evaluate relative paths for the files to parse.'],
-            'encoding': ['utf-8', 'Encoding of the files to parse.']
+            'encoding': ['utf-8', 'Encoding of the files to parse.'],
+            'debug': ['false', 'To print debug logs']
         }
         for key, value in configs.items():
             self.setConfig(key, value)
@@ -58,6 +52,7 @@ class ShellPreprocessor(Preprocessor):
         super(ShellPreprocessor, self).__init__(md)
         self.base_path = config['base_path']
         self.encoding = config['encoding']
+        self.debug = config['debug']
 
     def run(self, lines):
         new_lines = []
@@ -66,6 +61,7 @@ class ShellPreprocessor(Preprocessor):
                 m = SHELL_SYNTAX.search(line)
                 if m:
                     level = self.__find_current_level(reversed(new_lines))
+                    self.__log("Depth level : " + str(level))
                     new_lines.extend(self.__process(level, m.group(1)))
                 else:
                     new_lines.append(line)
@@ -91,16 +87,24 @@ class ShellPreprocessor(Preprocessor):
     def __list_to_string(value_list):
         return ", ".join(value_list)
 
+    def __log(self, obj):
+        if self.debug.lower() == 'true'.lower():
+            print(str(obj))
+
     def __process(self, current_level, directories):
         lines_to_add = []
+        self.__log("Input paths : " + str(directories))
         for directory in directories.split(","):
+            self.__log("Processing : " + str(directory))
             directory_path = os.path.expanduser(directory.strip())
             if not os.path.isabs(directory_path):
                 directory_path = os.path.normpath(os.path.join(self.base_path, directory_path))
-
+            self.__log("Full path : " + str(directory_path))
             for clazz in Parser(directory_path).parse():
+                self.__log("Class details : " + str(clazz.group_name))
                 lines_to_add.append("#" * (current_level + 1) + " " + clazz.group_name)
                 for method in clazz.methods:
+                    self.__log("Method details : " + str(method.name) + "," + str(method.description))
                     lines_to_add.append("#" * (current_level + 2) + " " + method.name)
                     lines_to_add.append(method.description)
                     lines_to_add.append("")
@@ -108,6 +112,8 @@ class ShellPreprocessor(Preprocessor):
                         lines_to_add.append(self.__table_row("Name", "Required", "Default Value", "Description"))
                         lines_to_add.append(self.__table_row("---", ":---:", ":---:", "---"))
                         for parameter in sorted(method.parameters, key=lambda x: not x.required):
+                            self.__log("Parameter details : " + str(parameter.value) + "," + str(
+                                parameter.required) + "," + str(parameter.default_value) + "," + str(parameter.help))
                             lines_to_add.append(self.__table_row(
                                 self.__list_to_string(parameter.value),
                                 str(parameter.required).lower(),

@@ -45,6 +45,8 @@ class ParserTestCase(unittest.TestCase):
                        .withMethod(Method("system-env", "List system environment."))) \
             .withClass(Class("System Commands group")  # Ssh Shell component group
                        .withMethod(Method("system-env", "List system environment."))) \
+            .withClass(Class("Commands group key/value")
+                       .withMethod(Method("foo", "foo description"))) \
             .verify(Parser("files/complete").parse())
 
     def test_file_path(self):
@@ -66,7 +68,10 @@ class ParserTestCase(unittest.TestCase):
                        .withMethod(Method("user-update", "")
                                    .withParameter(Parameter(["--new-name"], "The new name of the user", "", True))
                                    .withParameter(Parameter(["--old-name"], "The old name of the user", "", True)))) \
-            .verify(Parser("files/kotlin/generated.java").parse())
+            .withClass(Class("Group")  # With a group
+                       .withMethod(Method("user-add", "")
+                                   .withParameter(Parameter(["--name"], "The name of the user", "", True)))) \
+            .verify(Parser("files/kotlin/").parse())
 
 
 class Verifier:

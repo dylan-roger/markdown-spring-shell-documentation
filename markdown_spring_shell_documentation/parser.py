@@ -57,6 +57,13 @@ def resolve_constant(variable, constants):
         return variable
 
 
+def get_element(element):
+    if isinstance(element, list):
+        return element[0].value
+    else:
+        return element
+
+
 class ParameterDetails:
     value = None
     help = ""
@@ -130,7 +137,7 @@ class MethodDetails:
 
 class ClassDetails:
     def __init__(self, group_name, methods):
-        self.group_name = group_name
+        self.group_name = get_element(group_name)
         self.methods = methods
 
     def resolve_constants(self, constants):
