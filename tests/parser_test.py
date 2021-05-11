@@ -39,6 +39,9 @@ class ParserTestCase(unittest.TestCase):
                                    .withParameter(Parameter(["-v"], "", "abc", False)))
                        .withMethod(Method("multiple-values", "description")
                                    .withParameter(Parameter(["-v", "--value"], "", "abc", False)))
+                       .withMethod(Method("null-default-value", "description")
+                                   .withParameter(Parameter(["--value"], "", "", False))
+                                   .withParameter(Parameter(["--other-value"], "", "", False)))
                        .withMethod(Method("system-env", "")
                                    .withParameter(Parameter(["--value"], "system-env", "", True)))) \
             .withClass(Class("System Commands group")  # Shell component group
@@ -70,7 +73,9 @@ class ParserTestCase(unittest.TestCase):
                                    .withParameter(Parameter(["--old-name"], "The old name of the user", "", True)))) \
             .withClass(Class("Group")  # With a group
                        .withMethod(Method("user-add", "")
-                                   .withParameter(Parameter(["--name"], "The name of the user", "", True)))) \
+                                   .withParameter(Parameter(["--name"], "The name of the user", "", True))
+                                   .withParameter(Parameter(["--value"], "", "", False))
+                                   .withParameter(Parameter(["--other-value"], "", "", False)))) \
             .verify(Parser("files/kotlin/").parse())
 
 

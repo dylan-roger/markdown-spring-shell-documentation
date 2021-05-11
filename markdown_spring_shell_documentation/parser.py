@@ -81,6 +81,9 @@ class ParameterDetails:
                 elif element.name == "defaultValue":
                     if isinstance(element.value, javalang.tree.MemberReference) and element.value.member == "NULL":
                         self.default_value = ""
+                    elif isinstance(element.value, javalang.tree.Literal) and trim_quotes(
+                            element.value.value) == "__NULL__":
+                        self.default_value = ""
                     else:
                         self.default_value = element.value
         # If there is no annotation, or some fields are missing

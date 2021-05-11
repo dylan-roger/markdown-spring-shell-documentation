@@ -26,6 +26,11 @@ public class SystemCommand {
     public void multipleValues(@ShellOption(value = {"-v", "--value"}, defaultValue = "abc") String value) {
     }
 
+    @ShellMethod(key = "null-default-value", value = "description")
+    public void nullDefaultValue(@ShellOption(defaultValue = ShellOption.NULL) String value,
+                                 @ShellOption(defaultValue = NULL) String otherValue) {
+    }
+
     @ShellMethod(key = COMMAND_SYSTEM_ENV)
     public void usingConstant(@ShellOption(help = COMMAND_SYSTEM_ENV) String value) {
     }
